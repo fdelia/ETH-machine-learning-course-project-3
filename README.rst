@@ -1,3 +1,5 @@
+Use `export PYTHONPATH=/usr/local/anaconda3/envs/ml_project/lib/python3.5/`.
+
 =============================
 ETH Machine Learning Projects
 =============================
