@@ -61,11 +61,7 @@ class RandomBinsExtraction(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X_new = []
         if self.hist_bins is None:
-            self.hist_bins = [
-                                -1063.23640194,
-                                -502.03339032,
-                                -422.5276436,
-                                -286.42136028,   -97.20735832,   -55.16501241,  123.49800188 ,  206.09874563 ,  337.38048621,   637.69219956,   939.23230402]
+            self.hist_bins = [-1063.23640194, -502.03339032,  -422.5276436,   -286.42136028,   -97.20735832,   -55.16501241,   123.49800188 ,  206.09874563 ,  337.38048621,   637.69219956,   939.23230402]
 
         for row in X:
             splits = np.array_split(row, int(self.splits))
@@ -84,7 +80,9 @@ class Run(BaseEstimator, TransformerMixin):
         pipe = Pipeline([
             ('BinsExtraction', RandomBinsExtraction(splits=80)),
             ('scaler', StandardScaler()),
-            ('logreg', GradientBoostingClassifier(n_estimators=50, learning_rate=0.1))
+            ('logreg',
+                GradientBoostingClassifier(n_estimators=30, learning_rate=0.1)
+             )
         ])
         self.pipe = pipe
 
@@ -99,4 +97,4 @@ class Run(BaseEstimator, TransformerMixin):
         return self.pipe.predict_proba(X)
 
     def predict(self, X):
-        return self.pipe.predict(X)
+        return np.array(self.pipe.predict(X)).astype(int)
