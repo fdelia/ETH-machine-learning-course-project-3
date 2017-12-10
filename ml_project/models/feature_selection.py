@@ -2,6 +2,10 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils import check_random_state
 from sklearn.utils.validation import check_array, check_is_fitted
 from sklearn.utils.random import sample_without_replacement
+import numpy as np
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import GradientBoostingClassifier
 
 
 class NonZeroSelection(BaseEstimator, TransformerMixin):
@@ -44,6 +48,7 @@ class RandomSelection(BaseEstimator, TransformerMixin):
 
         return X_new
 
+
 class RandomBinsExtraction(BaseEstimator, TransformerMixin):
     """Build n bins with mean from values"""
     def __init__(self, splits=100, hist_bins=None):
@@ -56,51 +61,35 @@ class RandomBinsExtraction(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X_new = []
         if self.hist_bins is None:
-            self.hist_bins = [-1063.23640194, -502.03339032,  -422.5276436,   -286.42136028,   -97.20735832,   -55.16501241,  123.49800188 ,  206.09874563 ,  337.38048621,   637.69219956,   939.23230402]
+            self.hist_bins = [
+                                -1063.23640194,
+                                -502.03339032,
+                                -422.5276436,
+                                -286.42136028,   -97.20735832,   -55.16501241,  123.49800188 ,  206.09874563 ,  337.38048621,   637.69219956,   939.23230402]
 
         for row in X:
             splits = np.array_split(row, int(self.splits))
 
             features = []
             for j, split in enumerate(splits):
-                i = int(j / len(splits) * len(self.hist_bins))
-                #features.append(np.histogram(split, bins=self.hist_bins[i])[0])
+                # i = int(j / len(splits) * len(self.hist_bins))
                 features.append(np.histogram(split, bins=self.hist_bins)[0])
 
             X_new.append(np.array(features).flatten())
-
-        #print("features: "+str(len(X_new[0])))
         return X_new
 
 
 class Run(BaseEstimator, TransformerMixin):
     def __init__(self):
-        self.pipe = None
-
-    def sampleIt(self, X, y):
-        X_new = []
-        y_new = []
-        sample_w = []
-        for i, row_y in enumerate(y):
-            for cl, p_i in enumerate(row_y):
-                X_new.append(X[i])
-                y_new.append(cl)
-                sample_w.append(p_i)
-        return X_new, y_new, sample_w
+        pipe = Pipeline([
+            ('BinsExtraction', RandomBinsExtraction(splits=80)),
+            ('scaler', StandardScaler()),
+            ('logreg', GradientBoostingClassifier(n_estimators=50, learning_rate=0.1))
+        ])
+        self.pipe = pipe
 
     def fit(self, X, y=None):
-        if y is not None:
-            X, y, weights = self.sampleIt(X, y)
-
-        pipe = Pipeline([
-            ('BinsExtraction', RandomBinsExtraction(splits=10000)),
-            ('scaler', StandardScaler()),
-            ('logreg', LogisticRegression(
-                C=1.0, solver='newton-cg', n_jobs=-1
-            ))
-        ])
-        pipe.fit(X, y, **{'logreg__sample_weight': weights})
-        self.pipe = pipe
+        self.pipe.fit(X, y)
         return self
 
     def transform(self, X, y=None):

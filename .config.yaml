@@ -11,21 +11,21 @@
 #params:
 #  n_components: 1000
 #  random_state: 37
-#module: ml_project.models.feature_selection
-#class: Run
+module: ml_project.models.feature_selection
+class: Run
 
-module: ml_project.pipeline
-class: Pipeline
-params:
-  class_list:
-    - module: ml_project.models.feature_selection
-      class: RandomBinsExtraction
-    - module: sklearn.preprocessing
-      class: StandardScaler
-    - module: sklearn.ensemble
-      class: GradientBoostingClassifier
-      params:
-        - n_estimators: 50
+# module: ml_project.pipeline
+# class: Pipeline
+# params:
+#   class_list:
+#     - module: ml_project.models.feature_selection
+#       class: RandomBinsExtraction
+#     - module: sklearn.preprocessing
+#       class: StandardScaler
+#     - module: sklearn.ensemble
+#       class: GradientBoostingClassifier
+#       params:
+#         - n_estimators: 50
 
 #Example 2 (Warning: might exceed your memory)
 #smt run --config .config.yaml -X data/X_train.npy -y data/y_1.csv -a fit
