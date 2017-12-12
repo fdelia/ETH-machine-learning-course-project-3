@@ -61,15 +61,26 @@ class RandomBinsExtraction(BaseEstimator, TransformerMixin):
     def transform(self, X, y=None):
         X_new = []
         if self.hist_bins is None:
-            self.hist_bins = [-1063.23640194, -502.03339032,  -422.5276436,   -286.42136028,   -97.20735832,   -55.16501241,   123.49800188 ,  206.09874563 ,  337.38048621,   637.69219956,   939.23230402]
+            self.hist_bins = [np.array([-1083.59921692,  -476.33763822,  -391.50489743,  -355.60320737,
+        -158.43665552,   -14.84714956,    94.77981205,   218.64467678,
+         346.5553962 ,   734.50802575,  1002.02972199]), np.array([-1019.66220701,  -523.43519633,  -379.07005136,  -331.66828082,
+        -156.15875706,    18.12736061,    39.05190812,   258.69304456,
+         372.82923485,   730.21415049,  1041.77824411]), np.array([-1092.05133913,  -467.36450973,  -323.77895088,  -276.7100964 ,
+        -177.65586773,   -29.1918839 ,    95.14627871,   267.45422342,
+         319.30367525,   752.0415106 ,  1031.95221106]), np.array([-1026.0900565 ,  -550.04804846,  -487.69032655,  -306.6158703 ,
+        -166.89823442,   -61.82025277,   108.66079029,   124.07144747,
+         274.9071339 ,   519.71265528,   911.63967546]), np.array([-1012.82800316,  -526.8370896 ,  -425.31935619,  -369.87368713,
+        -134.25612587,  -125.16553721,   137.63442111,   221.84134438,
+         308.374747  ,   698.18557519,  1044.20382967])]
 
         for row in X:
             splits = np.array_split(row, int(self.splits))
 
             features = []
             for j, split in enumerate(splits):
-                # i = int(j / len(splits) * len(self.hist_bins))
-                features.append(np.histogram(split, bins=self.hist_bins)[0])
+                i = int(j / len(splits) * len(self.hist_bins))
+                # features.append(np.histogram(split, bins=self.hist_bins)[0])
+                features.append(np.histogram(split, bins=self.hist_bins[i])[0])
 
             X_new.append(np.array(features).flatten())
         return X_new
